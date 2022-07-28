@@ -122,6 +122,6 @@ puts top_two
        .map { |(player, scores)| player + scores.flatten + [scores.first.first.to_i - (scores.last&.first.to_i)] }
        .sort_by(&:last)
        .reverse
-       .take(50)
+       .take_while { |a| a.last >= 190 }
        .map { |r| r.join(',') }
        .join("\n")
