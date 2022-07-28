@@ -119,7 +119,7 @@ top_two.each do |player, scores|
 end
 
 puts top_two
-       .map { |(player, scores)| player + scores.flatten + [scores.first.first.to_i - scores.last.first.to_i] }
+       .map { |(player, scores)| player + scores.flatten + [scores.first.first.to_i - (scores.last&.first.to_i)] }
        .sort_by(&:last)
        .reverse
        .take(50)
