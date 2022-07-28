@@ -61,6 +61,15 @@ def extract_single_innings(cell)
   ]
 end
 
+def valid_row?(row)
+  cells = row.css('td')
+
+  cells.length > 12 &&
+    cells[2].text.to_i > 0 &&
+    cells.last.text.gsub(/[[:space:]]/, '') != '' &&
+    !cells.last.text.start_with?('misc')
+end
+
 def top_two(player, rows)
   [
     player,
@@ -79,7 +88,7 @@ def second_highest(player_url)
     Oga
       .parse_html(fetch(INNINGS_QUERY + player_id))
       .css('#mainColumnContainerLeft tr')
-      .select { |r| r.css('td').length > 12 && r.css('td')[2].text.to_i > 0 }
+      .select(&method(:valid_row?))
       .map(&method(:extract_single_innings))
       .sort_by { |(score, _url)| score.to_i }
       .reverse[1]
