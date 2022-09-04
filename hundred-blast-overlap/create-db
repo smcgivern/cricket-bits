@@ -1,0 +1,42 @@
+#!/bin/bash
+
+target="data/competitions.sqlite3"
+
+create_table() {
+    read -r -d '' commands <<COMMANDS
+${commands}
+
+CREATE TABLE ${1}_${2}_averages (
+  player text,
+  matches integer,
+  innings integer,
+  not_outs integer,
+  runs integer,
+  high_score text,
+  average numeric,
+  strike_rate numeric,
+  hundreds integer,
+  fifties integer,
+  catches integer,
+  stumpings integer
+);
+
+.import --skip 1 --csv data/${1}-${2}.csv ${1}_${2}_averages
+
+ALTER TABLE ${1}_${2}_averages ADD COLUMN balls_faced integer;
+ALTER TABLE ${1}_${2}_averages ADD COLUMN outs integer;
+
+UPDATE ${1}_${2}_averages
+SET
+  player = substr(player, 0, instr(player, '(') - 1),
+  balls_faced = CAST(round(100 * runs / strike_rate) AS integer),
+  outs = innings - not_outs;
+COMMANDS
+}
+
+for competition in "Hundred" "Blast"; do
+    create_table "${competition}" 2021
+    create_table "${competition}" 2022
+done
+
+echo "${commands}" | sqlite3 "${target}"

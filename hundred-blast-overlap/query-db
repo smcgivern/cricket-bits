@@ -1,0 +1,87 @@
+#!/bin/bash
+
+target="data/competitions.sqlite3"
+
+joined_query() {
+    read -r -d '' joined <<JOINED
+WITH joined AS (
+  SELECT
+    Hundred_${1}_averages.player,
+    CAST(Hundred_${1}_averages.runs AS integer) AS hundred_runs,
+    Hundred_${1}_averages.balls_faced AS hundred_balls_faced,
+    Hundred_${1}_averages.outs AS hundred_outs,
+    CAST(Blast_${1}_averages.runs AS integer) AS blast_runs,
+    Blast_${1}_averages.balls_faced AS blast_balls_faced,
+    Blast_${1}_averages.outs AS blast_outs
+  FROM Hundred_${1}_averages
+  INNER JOIN Blast_${1}_averages
+    ON Hundred_${1}_averages.player = Blast_${1}_averages.player
+  WHERE Hundred_${1}_averages.runs > 0
+    AND Blast_${1}_averages.runs > 0
+)
+${2}
+JOINED
+
+    echo "${joined}" | sqlite3 -csv -header "${target}"
+    echo ''
+}
+
+overall_query() {
+    echo "${1} overall"
+
+    read -r -d '' query <<QUERY
+SELECT
+  SUM(hundred_runs) AS hundred_runs,
+  round(CAST(SUM(hundred_runs) AS real) / SUM(hundred_outs), 2) AS hundred_average,
+  round(CAST(SUM(hundred_runs) AS real) / SUM(hundred_balls_faced), 2) AS hundred_strike_rate,
+  SUM(blast_runs) AS blast_runs,
+  round(CAST(SUM(blast_runs) AS real) / SUM(blast_outs), 2) AS blast_average,
+  round(CAST(SUM(blast_runs) AS real) / SUM(blast_balls_faced), 2) AS blast_strike_rate
+FROM joined;
+QUERY
+    joined_query "${1}" "${query}"
+
+    echo "${1} top Hundred scorers"
+    read -r -d '' query <<QUERY
+SELECT
+  player,
+  SUM(hundred_runs) AS hundred_runs,
+  round(CAST(SUM(hundred_runs) AS real) / SUM(hundred_outs), 2) AS hundred_average,
+  round(CAST(SUM(hundred_runs) AS real) / SUM(hundred_balls_faced), 2) AS hundred_strike_rate,
+  SUM(blast_runs) AS blast_runs,
+  round(CAST(SUM(blast_runs) AS real) / SUM(blast_outs), 2) AS blast_average,
+  round(CAST(SUM(blast_runs) AS real) / SUM(blast_balls_faced), 2) AS blast_strike_rate
+FROM joined
+GROUP BY player
+ORDER BY hundred_runs DESC
+LIMIT 10;
+QUERY
+    joined_query "${1}" "${query}"
+
+    echo "${1} top Blast scorers (excluding above)"
+    read -r -d '' query <<QUERY
+SELECT
+  player,
+  SUM(hundred_runs) AS hundred_runs,
+  round(CAST(SUM(hundred_runs) AS real) / SUM(hundred_outs), 2) AS hundred_average,
+  round(CAST(SUM(hundred_runs) AS real) / SUM(hundred_balls_faced), 2) AS hundred_strike_rate,
+  SUM(blast_runs) AS blast_runs,
+  round(CAST(SUM(blast_runs) AS real) / SUM(blast_outs), 2) AS blast_average,
+  round(CAST(SUM(blast_runs) AS real) / SUM(blast_balls_faced), 2) AS blast_strike_rate
+FROM joined
+WHERE player NOT IN (
+  SELECT player
+  FROM joined
+  GROUP BY player
+  ORDER BY SUM(hundred_runs) DESC
+  LIMIT 10
+)
+GROUP BY player
+ORDER BY blast_runs DESC
+LIMIT 10;
+QUERY
+    joined_query "${1}" "${query}"
+}
+
+overall_query 2021
+overall_query 2022
