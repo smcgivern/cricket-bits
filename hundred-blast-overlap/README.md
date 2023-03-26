@@ -7,8 +7,8 @@ competition is stronger, by using only the same players.
 We can also calculate the players who improved the most from one to the other,
 in both directions.
 
-First, install SQLite (if you have the plugin for asdf, `asdf install` will do
-it. Then:
+First, install SQLite (if you use Nix and direnv, this will happen
+automatically). Then:
 
 ```shell
 $ ./create-db

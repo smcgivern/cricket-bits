@@ -15,7 +15,6 @@ table to a CSV with these columns:
 5. Match details ('A v B, C v D')
 
 ```shell
-asdf install
 bundle
 ./scrape.rb
 ```

@@ -25,7 +25,6 @@ It then outputs a CSV with:
 7. Gap
 
 ```shell
-asdf install
 bundle
 ./scrape.rb
 ```
