@@ -24,11 +24,16 @@ def overs(file)
   end
 
   players = candidates.select(&:any?).flat_map do |overs|
-    overs.map { |o| o['deliveries'][0].values_at('batter', 'bowler') }
+    overs.map do |over|
+      over['deliveries'][0].values_at('batter', 'bowler') +
+        [over['deliveries'].map { |d| d['runs']['total'] }.join('')]
+    end
   end
 
   if players.any?
-    pp [json['info']['dates'].first, json['info']['event'], players]
+    puts ([json['info']['dates'].first] +
+          json['info']['event'].values_at('name', 'match_number') +
+          players).join(',')
   end
 end
 
@@ -40,8 +45,7 @@ def match?(deliveries)
   return false unless runs.length == 6
 
   runs[0] != 0 && runs[1] != 0 && runs[2] != 0 && runs[3] == 0 && runs[4] != 0 && runs[5] != 0 &&
-    MOST_FC_RUNS.include?("#{runs[0]}#{runs[1]}#{runs[1]}#{runs[4]}#{runs[5]}") &&
-    p("#{runs[0]}#{runs[1]}#{runs[1]}#{runs[4]}#{runs[5]}")
+    MOST_FC_RUNS.include?("#{runs[0]}#{runs[1]}#{runs[2]}#{runs[4]}#{runs[5]}")
 end
 
 Dir["#{ARGV[0]}/*.json"].each do |file|
