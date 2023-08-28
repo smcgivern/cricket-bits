@@ -1,0 +1,4 @@
+source 'https://rubygems.org'
+
+gem 'dijkstra_fast', '~> 1.5'
+gem 'sqlite3', '~> 1.6'

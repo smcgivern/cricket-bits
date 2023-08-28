@@ -1,0 +1,15 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    dijkstra_fast (1.5.3)
+    sqlite3 (1.6.4-arm64-darwin)
+
+PLATFORMS
+  arm64-darwin-22
+
+DEPENDENCIES
+  dijkstra_fast (~> 1.5)
+  sqlite3 (~> 1.6)
+
+BUNDLED WITH
+   2.3.7
