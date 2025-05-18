@@ -10,7 +10,7 @@
     let pkgs = import nixpkgs { inherit system; };
     in {
       devShells.default = pkgs.mkShellNoCC {
-        buildInputs = with pkgs; [ ruby_3_2 sqlite ];
+        buildInputs = with pkgs; [ cargo ruby_3_2 rustc sqlite ];
       };
     }
   );
